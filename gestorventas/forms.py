@@ -4,12 +4,12 @@ from .models import VentasModel
 class VentaForm(forms.ModelForm):
     class Meta:
         model = VentasModel
-        fields = ['vendedor', 'cantidad', 'fecha']
+        fields = ['vendedorId', 'cantidadVenta', 'fechaVenta']
         widgets = {
-            'fecha': forms.DateInput(attrs={'type': 'date'}),
+            'fechaVenta': forms.DateInput(attrs={'type': 'date'}),
         }
         labels = {
-            'vendedor': 'Vendedor',
-            'cantidad': 'Cantidad Vendida',
-            'fecha': 'Fecha de Venta',
+            'vendedorId': 'Vendedor',
+            'cantidadVenta': 'Cantidad Vendida',
+            'fechaVenta': 'Fecha de Venta',
         }
