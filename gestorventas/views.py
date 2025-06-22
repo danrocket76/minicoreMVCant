@@ -33,11 +33,18 @@ def registrar_venta(request):
     }
     return render(request, 'gestorventas/registrar_venta.html', contexto)
 
+from django.db.models import Sum
+from datetime import datetime
+
 def calcular_comisiones(request):
     contexto = {
-        'ventas_por_vendedor': [],
+        'ventas_totales': 0,
+        'meta_venta': 0,
+        'comision': 0,
+        'bono': 0,
+        'vendedor': None,
         'mensaje': '',
-        'vendedores': VendedorModel.objects.all(),
+        'tabla_vendedores': []
     }
 
     if request.method == "POST":
@@ -48,48 +55,65 @@ def calcular_comisiones(request):
         try:
             fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
             fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
-            regla = ReglasModel.objects.first()
 
-            if not regla:
-                contexto['mensaje'] = "No se ha configurado ninguna regla de comisión."
-                return render(request, "gestorventas/calcular_bono.html", contexto)
-
-            if vendedor_id:  
+            if vendedor_id:
+                # Calcular para un vendedor específico
                 ventas = VentasModel.objects.filter(
-                    vendedorId=vendedor_id,
+                    vendedor_id=vendedor_id,
                     fechaVenta__range=(fecha_inicio, fecha_fin)
                 ).aggregate(total=Sum('cantidadVenta'))
 
                 ventas_totales = ventas['total'] if ventas['total'] else 0
-                bono = ventas_totales * regla.cantidadComision if ventas_totales >= regla.metaVenta else 0
 
-                vendedor = VendedorModel.objects.get(pk=vendedor_id)
-                contexto['ventas_por_vendedor'].append({
-                    'nombre': f"{vendedor.nombreVendedor} {vendedor.apellidoVendedor}",
-                    'ventas_totales': ventas_totales,
-                    'bono': bono,
-                })
-            else:  
-                todos_los_vendedores = VendedorModel.objects.all()
-                for vendedor in todos_los_vendedores:
+                regla = ReglasModel.objects.filter(metaVenta__lte=ventas_totales).order_by('-metaVenta').first()
+
+                if regla:
+                    bono = ventas_totales * regla.cantidadComision
+                    vendedor = VendedorModel.objects.get(pk=vendedor_id)
+                    contexto.update({
+                        'ventas_totales': ventas_totales,
+                        'meta_venta': regla.metaVenta,
+                        'comision': regla.cantidadComision,
+                        'bono': bono,
+                        'vendedor': vendedor,
+                    })
+                else:
+                    contexto['mensaje'] = "No se encontró una regla de comisión aplicable."
+            else:
+                # Calcular para todos los vendedores
+                vendedores = VendedorModel.objects.all()
+                tabla_vendedores = []
+
+                for vendedor in vendedores:
                     ventas = VentasModel.objects.filter(
-                        vendedorId=vendedor.vendedorId,
+                        vendedor_id=vendedor.vendedorId,
                         fechaVenta__range=(fecha_inicio, fecha_fin)
                     ).aggregate(total=Sum('cantidadVenta'))
 
                     ventas_totales = ventas['total'] if ventas['total'] else 0
-                    bono = ventas_totales * regla.cantidadComision if ventas_totales >= regla.metaVenta else 0
 
-                    contexto['ventas_por_vendedor'].append({
+                    regla = ReglasModel.objects.filter(metaVenta__lte=ventas_totales).order_by('-metaVenta').first()
+
+                    if regla:
+                        bono = ventas_totales * regla.cantidadComision
+                    else:
+                        bono = 0
+
+                    tabla_vendedores.append({
                         'nombre': f"{vendedor.nombreVendedor} {vendedor.apellidoVendedor}",
                         'ventas_totales': ventas_totales,
+                        'meta_venta': regla.metaVenta if regla else 0,
+                        'comision': regla.cantidadComision if regla else 0,
                         'bono': bono,
                     })
+
+                contexto['tabla_vendedores'] = tabla_vendedores
 
         except Exception as e:
             contexto['mensaje'] = f"Error al procesar los datos: {e}"
 
     return render(request, "gestorventas/calcular_bono.html", contexto)
+
 
 def cargar_vendedores_y_ventas():
     vendedores = VendedorModel.objects.all()
