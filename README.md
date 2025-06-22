@@ -127,3 +127,16 @@ sistema-de-ventas/
 
     5. ventas_exito.html: Mensaje de confirmación tras registrar una venta.
 
+# Fuentes utilizadas para comprender el proyecto
+
+    Query Filter Events By Date - Django Wednesdays #36
+    https://www.youtube.com/watch?v=4AnwvUJGJzw
+
+    Django ORM - SQL Insert - Working with datetime fields and foreign keys
+    https://www.youtube.com/watch?v=7dV3hyql8x0
+
+    How do I filter query objects by date range in Django?
+    https://www.youtube.com/watch?v=Mx8ABgqfL3Q
+
+    Django Official Documentation
+    https://docs.djangoproject.com/en/5.2/
