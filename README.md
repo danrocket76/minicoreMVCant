@@ -140,3 +140,9 @@ sistema-de-ventas/
 
     Django Official Documentation
     https://docs.djangoproject.com/en/5.2/
+
+    Curso Práctico de Django: Desarrollo Web Backend con Python
+    https://www.udemy.com/course/curso-django-2-practico-desarrollo-web-python-3/?srsltid=AfmBOopw3bxpo7Ma98QNg9s-XQLWiCCCcu4-ZMJxT6vrUJUGSvBr-Eey
+
+# Contacto
+    mateo.jaramillo.costa@udla.edu.ec
