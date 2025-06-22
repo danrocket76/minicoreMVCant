@@ -16,7 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.shortcuts import render 
+from gestorventas.views import calcular_comisiones, registrar_venta, index
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', index, name='index'),
+    path('calcular-comisiones/', calcular_comisiones, name='calcular_comisiones'),
+    path('registrar-venta/', registrar_venta, name='registrar_venta'),
+    path('ventas-exito/', lambda request: render(request, 'ventas_exito.html'), name='ventas_exito'),
 ]
+
