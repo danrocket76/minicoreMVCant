@@ -33,9 +33,6 @@ def registrar_venta(request):
     }
     return render(request, 'gestorventas/registrar_venta.html', contexto)
 
-from django.db.models import Sum
-from datetime import datetime
-
 def calcular_comisiones(request):
     contexto = {
         'ventas_totales': 0,
