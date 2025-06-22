@@ -59,7 +59,7 @@ def calcular_comisiones(request):
             if vendedor_id:
                 # Calcular para un vendedor específico
                 ventas = VentasModel.objects.filter(
-                    vendedor_id=vendedor_id,
+                    vendedorId_id=vendedor_id,  # Cambiado a vendedorId_id
                     fechaVenta__range=(fecha_inicio, fecha_fin)
                 ).aggregate(total=Sum('cantidadVenta'))
 
@@ -86,7 +86,7 @@ def calcular_comisiones(request):
 
                 for vendedor in vendedores:
                     ventas = VentasModel.objects.filter(
-                        vendedor_id=vendedor.vendedorId,
+                        vendedorId_id=vendedor.vendedorId,  # Cambiado a vendedorId_id
                         fechaVenta__range=(fecha_inicio, fecha_fin)
                     ).aggregate(total=Sum('cantidadVenta'))
 
@@ -113,7 +113,6 @@ def calcular_comisiones(request):
             contexto['mensaje'] = f"Error al procesar los datos: {e}"
 
     return render(request, "gestorventas/calcular_bono.html", contexto)
-
 
 def cargar_vendedores_y_ventas():
     vendedores = VendedorModel.objects.all()
