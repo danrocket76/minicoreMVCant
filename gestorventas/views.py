@@ -54,7 +54,7 @@ def calcular_comisiones(request):
                 contexto['mensaje'] = "No se ha configurado ninguna regla de comisión."
                 return render(request, "gestorventas/calcular_bono.html", contexto)
 
-            if vendedor_id:  # Caso: un vendedor seleccionado
+            if vendedor_id:  
                 ventas = VentasModel.objects.filter(
                     vendedorId=vendedor_id,
                     fechaVenta__range=(fecha_inicio, fecha_fin)
@@ -69,7 +69,7 @@ def calcular_comisiones(request):
                     'ventas_totales': ventas_totales,
                     'bono': bono,
                 })
-            else:  # Caso: calcular para todos los vendedores
+            else:  
                 todos_los_vendedores = VendedorModel.objects.all()
                 for vendedor in todos_los_vendedores:
                     ventas = VentasModel.objects.filter(

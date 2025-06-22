@@ -1,0 +1,10 @@
+django>=5.0
+python-dotenv
+django-crispy-forms
+pillow
+django-bootstrap5
+django-ckeditor
+pylint
+pylint-django
+pylint-celery
+whitenoise
