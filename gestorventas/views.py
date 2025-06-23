@@ -35,6 +35,7 @@ def registrar_venta(request):
 
 def calcular_comisiones(request):
     contexto = {
+        'vendedores': VendedorModel.objects.all(),
         'ventas_totales': 0,
         'meta_venta': 0,
         'comision': 0,
@@ -54,9 +55,8 @@ def calcular_comisiones(request):
             fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
 
             if vendedor_id:
-                # Calcular para un vendedor específico
                 ventas = VentasModel.objects.filter(
-                    vendedorId_id=vendedor_id,  # Cambiado a vendedorId_id
+                    vendedorId_id=vendedor_id,
                     fechaVenta__range=(fecha_inicio, fecha_fin)
                 ).aggregate(total=Sum('cantidadVenta'))
 
@@ -67,23 +67,23 @@ def calcular_comisiones(request):
                 if regla:
                     bono = ventas_totales * regla.cantidadComision
                     vendedor = VendedorModel.objects.get(pk=vendedor_id)
-                    contexto.update({
+                    contexto['tabla_vendedores'] = [{
+                        'nombre': f"{vendedor.nombreVendedor} {vendedor.apellidoVendedor}",
                         'ventas_totales': ventas_totales,
                         'meta_venta': regla.metaVenta,
                         'comision': regla.cantidadComision,
                         'bono': bono,
-                        'vendedor': vendedor,
-                    })
+                    }]
                 else:
-                    contexto['mensaje'] = "No se encontró una regla de comisión aplicable."
+                    contexto['mensaje'] = "No se encontró una regla de comisión aplicable o el periodo seleccionado no registra ventas."
+
             else:
-                # Calcular para todos los vendedores
                 vendedores = VendedorModel.objects.all()
                 tabla_vendedores = []
 
                 for vendedor in vendedores:
                     ventas = VentasModel.objects.filter(
-                        vendedorId_id=vendedor.vendedorId,  # Cambiado a vendedorId_id
+                        vendedorId_id=vendedor.vendedorId,
                         fechaVenta__range=(fecha_inicio, fecha_fin)
                     ).aggregate(total=Sum('cantidadVenta'))
 
