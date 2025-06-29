@@ -33,16 +33,15 @@ def registrar_venta(request):
     }
     return render(request, 'gestorventas/registrar_venta.html', contexto)
 
+from gestorventas.facade.comision_fasade import ComisionFacade
+from gestorventas.services.ventas_service import VentasService
+
 def calcular_comisiones(request):
+    fachada = ComisionFacade(VentasService())
     contexto = {
         'vendedores': VendedorModel.objects.all(),
-        'ventas_totales': 0,
-        'meta_venta': 0,
-        'comision': 0,
-        'bono': 0,
-        'vendedor': None,
-        'mensaje': '',
-        'tabla_vendedores': []
+        'tabla_vendedores': [],
+        'mensaje': ''
     }
 
     if request.method == "POST":
@@ -51,61 +50,7 @@ def calcular_comisiones(request):
         vendedor_id = request.POST.get("vendedor")
 
         try:
-            fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d")
-            fecha_fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
-
-            if vendedor_id:
-                ventas = VentasModel.objects.filter(
-                    vendedorId_id=vendedor_id,
-                    fechaVenta__range=(fecha_inicio, fecha_fin)
-                ).aggregate(total=Sum('cantidadVenta'))
-
-                ventas_totales = ventas['total'] if ventas['total'] else 0
-
-                regla = ReglasModel.objects.filter(metaVenta__lte=ventas_totales).order_by('-metaVenta').first()
-
-                if regla:
-                    bono = ventas_totales * regla.cantidadComision
-                    vendedor = VendedorModel.objects.get(pk=vendedor_id)
-                    contexto['tabla_vendedores'] = [{
-                        'nombre': f"{vendedor.nombreVendedor} {vendedor.apellidoVendedor}",
-                        'ventas_totales': ventas_totales,
-                        'meta_venta': regla.metaVenta,
-                        'comision': regla.cantidadComision,
-                        'bono': bono,
-                    }]
-                else:
-                    contexto['mensaje'] = "No se encontró una regla de comisión aplicable o el periodo seleccionado no registra ventas."
-
-            else:
-                vendedores = VendedorModel.objects.all()
-                tabla_vendedores = []
-
-                for vendedor in vendedores:
-                    ventas = VentasModel.objects.filter(
-                        vendedorId_id=vendedor.vendedorId,
-                        fechaVenta__range=(fecha_inicio, fecha_fin)
-                    ).aggregate(total=Sum('cantidadVenta'))
-
-                    ventas_totales = ventas['total'] if ventas['total'] else 0
-
-                    regla = ReglasModel.objects.filter(metaVenta__lte=ventas_totales).order_by('-metaVenta').first()
-
-                    if regla:
-                        bono = ventas_totales * regla.cantidadComision
-                    else:
-                        bono = 0
-
-                    tabla_vendedores.append({
-                        'nombre': f"{vendedor.nombreVendedor} {vendedor.apellidoVendedor}",
-                        'ventas_totales': ventas_totales,
-                        'meta_venta': regla.metaVenta if regla else 0,
-                        'comision': regla.cantidadComision if regla else 0,
-                        'bono': bono,
-                    })
-
-                contexto['tabla_vendedores'] = tabla_vendedores
-
+            contexto['tabla_vendedores'] = fachada.calcular_comisiones(vendedor_id, fecha_inicio, fecha_fin)
         except Exception as e:
             contexto['mensaje'] = f"Error al procesar los datos: {e}"
 
