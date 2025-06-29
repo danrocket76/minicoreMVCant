@@ -1,5 +1,5 @@
 from gestorventas.repositories.ventas_repository import VentasRepository
-from gestorventas.models import ReglasModel, VendedorModel
+from gestorventas.models import ReglasModel, VendedorModel, VentasModel
 
 class VentasService:
     @staticmethod
@@ -29,3 +29,18 @@ class VentasService:
                 'bono': bono,
             })
         return tabla_vendedores
+
+    @staticmethod
+    def cargar_vendedores_y_ventas():
+        vendedores = VendedorModel.objects.all()
+        ventas = VentasModel.objects.select_related('vendedorId').order_by('-fechaVenta')
+
+        datos_ventas = []
+        for venta in ventas:
+            datos_ventas.append({
+                'vendedor_nombre': f"{venta.vendedorId.nombreVendedor} {venta.vendedorId.apellidoVendedor}",
+                'cantidadVenta': venta.cantidadVenta,
+                'fechaVenta': venta.fechaVenta,
+            })
+
+        return vendedores, datos_ventas

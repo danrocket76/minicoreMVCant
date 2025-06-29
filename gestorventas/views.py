@@ -23,7 +23,7 @@ def registrar_venta(request):
     else:
         form = VentaForm()
 
-    vendedores, datos_ventas = cargar_vendedores_y_ventas()
+    vendedores, datos_ventas = VentasService.cargar_vendedores_y_ventas()
 
     contexto = {
         'form': form,
@@ -55,18 +55,3 @@ def calcular_comisiones(request):
             contexto['mensaje'] = f"Error al procesar los datos: {e}"
 
     return render(request, "gestorventas/calcular_bono.html", contexto)
-
-def cargar_vendedores_y_ventas():
-    vendedores = VendedorModel.objects.all()
-    ventas = VentasModel.objects.select_related('vendedorId').order_by('-fechaVenta')
-
-    datos_ventas = []
-    for venta in ventas:
-        datos_ventas.append({
-            'vendedor_nombre': f"{venta.vendedorId.nombreVendedor} {venta.vendedorId.apellidoVendedor}",
-            'cantidadVenta': venta.cantidadVenta,
-            'fechaVenta': venta.fechaVenta,
-        })
-
-    return vendedores, datos_ventas
-    
