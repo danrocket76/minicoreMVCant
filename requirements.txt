@@ -8,3 +8,4 @@ pylint
 pylint-django
 pylint-celery
 whitenoise
+gunicorn
